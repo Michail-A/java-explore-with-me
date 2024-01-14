@@ -1,8 +1,8 @@
 version: '3.1'
 services:
-  stat:
+  stats-server:
     build: stat/server
-    container_name: stat_server
+    container_name: stats_server
     ports:
       - "9090:9090"
     depends_on: [ stat-db ]
@@ -12,8 +12,8 @@ services:
       - POSTGRES_PASSWORD=root
       - DB_HOST=db
       - DB_PORT=5432
-      
-  stat-db:
+
+  stats-db:
     image: postgres:14-alpine
     container_name: stat_db
     ports:
