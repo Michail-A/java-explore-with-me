@@ -23,7 +23,7 @@ public class Client extends BaseClient {
     }
 
     public ResponseEntity<Object> create(HitDtoCreate hitDtoCreate) {
-        return post("/hit", null, hitDtoCreate);
+        return post("/hit", hitDtoCreate);
     }
 
     public ResponseEntity<Object> get(LocalDateTime start, LocalDateTime end, List<String> uri, Boolean unique) {
