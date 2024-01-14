@@ -5,7 +5,7 @@ services:
     container_name: stats_server
     ports:
       - "9090:9090"
-    depends_on: [ stat-db ]
+    depends_on: [ stats-db ]
     environment:
       - DB_NAME=stat
       - POSTGRES_USER=root
@@ -15,7 +15,7 @@ services:
 
   stats-db:
     image: postgres:14-alpine
-    container_name: stat_db
+    container_name: stats_db
     ports:
       - "6541:5432"
     environment:
