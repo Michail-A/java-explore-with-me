@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Map;
 
 public class Client extends BaseClient {
-    private String serverUrl = "http://localhost:9090";
-    public Client(serverUrl, RestTemplateBuilder builder) {
+
+    public Client(@Value("${SERVER_URL}") String serverUrl, RestTemplateBuilder builder) {
         super(
                 builder
                         .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl))
