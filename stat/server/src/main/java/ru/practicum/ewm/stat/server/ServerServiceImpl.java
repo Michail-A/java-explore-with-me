@@ -33,10 +33,14 @@ public class ServerServiceImpl implements ServerService {
             stats = serverRepository.getByNoUnique(start, end);
         }
         List<HitDtoGet> finalStat = new ArrayList<>();
-        for (HitDtoGet stat : stats) {
-            if (uri.contains(stat.getUri())) {
-                finalStat.add(stat);
+        if (uri != null) {
+            for (HitDtoGet stat : stats) {
+                if (uri.contains(stat.getUri())) {
+                    finalStat.add(stat);
+                }
             }
+        } else {
+            finalStat.addAll(stats);
         }
         return finalStat;
     }

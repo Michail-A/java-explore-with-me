@@ -24,10 +24,10 @@ public class ServerController {
         return serverService.create(hitDtoCreate);
     }
 
-    @GetMapping
+    @GetMapping("/stats")
     public List<HitDtoGet> getStats(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime start,
                                     @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end,
-                                    @RequestParam List<String> uri,
+                                    @RequestParam (required = false) List<String> uri,
                                     @RequestParam(defaultValue = "false") Boolean unique) {
         return serverService.getStats(start, end, uri, unique);
     }
