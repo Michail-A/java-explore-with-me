@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ServerRepository extends JpaRepository<HitModel, Integer> {
-    @Query(value = "select new ru.practicum.ewm.stat.dto.HitDtoGet( h.app, h.uri, count(distinct(h.ip)))" +
+    @Query(value = "select new ru.practicum.ewm.stat.dto.HitDtoGet( h.app, h.uri, count(h.ip))" +
             " from HitModel h where h.timestamp >= ?1 and h.timestamp <= ?2 " +
             "group by h.app, h.uri " +
             "order by 3 desc")
