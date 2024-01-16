@@ -22,7 +22,7 @@ public class ServerServiceImpl implements ServerService {
     }
 
     @Override
-    public List<HitDtoGet> getStats(LocalDateTime start, LocalDateTime end, List<String> uri, Boolean unique) {
+    public List<HitDtoGet> getStats(LocalDateTime start, LocalDateTime end, List<String> uri, boolean unique) {
         if (start.isAfter(end)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Старт не может быть позже конца");
         }

@@ -9,5 +9,5 @@ import java.util.List;
 public interface ServerService {
     HitModel create(HitDtoCreate hitDtoCreate);
 
-    List<HitDtoGet> getStats(LocalDateTime start, LocalDateTime end, List<String> uri, Boolean unique);
+    List<HitDtoGet> getStats(LocalDateTime start, LocalDateTime end, List<String> uri, boolean unique);
 }
