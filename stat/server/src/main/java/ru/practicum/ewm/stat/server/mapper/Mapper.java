@@ -1,7 +1,8 @@
-package ru.practicum.ewm.stat.server;
+package ru.practicum.ewm.stat.server.mapper;
 
 import ru.practicum.ewm.stat.dto.HitDtoCreate;
 import ru.practicum.ewm.stat.dto.HitDtoGet;
+import ru.practicum.ewm.stat.server.model.HitModel;
 
 public class Mapper {
     public static HitModel mapToNewHitModel(HitDtoCreate hitDtoCreate) {

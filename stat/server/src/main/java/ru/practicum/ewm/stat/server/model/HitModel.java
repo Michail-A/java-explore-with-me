@@ -1,4 +1,4 @@
-package ru.practicum.ewm.stat.server;
+package ru.practicum.ewm.stat.server.model;
 
 import lombok.Getter;
 import lombok.Setter;

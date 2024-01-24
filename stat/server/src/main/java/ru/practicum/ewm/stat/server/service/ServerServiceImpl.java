@@ -1,4 +1,4 @@
-package ru.practicum.ewm.stat.server;
+package ru.practicum.ewm.stat.server.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -6,6 +6,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import ru.practicum.ewm.stat.dto.HitDtoCreate;
 import ru.practicum.ewm.stat.dto.HitDtoGet;
+import ru.practicum.ewm.stat.server.mapper.Mapper;
+import ru.practicum.ewm.stat.server.model.HitModel;
+import ru.practicum.ewm.stat.server.repository.ServerRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package ru.practicum.ewm.stat.server;
+package ru.practicum.ewm.stat.server.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -7,6 +7,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.stat.dto.HitDtoCreate;
 import ru.practicum.ewm.stat.dto.HitDtoGet;
+import ru.practicum.ewm.stat.server.service.ServerService;
+import ru.practicum.ewm.stat.server.model.HitModel;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
