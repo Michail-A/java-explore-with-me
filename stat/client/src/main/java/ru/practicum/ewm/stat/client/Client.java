@@ -1,19 +1,24 @@
 package ru.practicum.ewm.stat.client;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.ewm.stat.dto.HitDtoCreate;
+import ru.practicum.ewm.stat.dto.HitDtoGet;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+@Service
 public class Client extends BaseClient {
 
-    public Client(@Value("${SERVER_URL}") String serverUrl, RestTemplateBuilder builder) {
+    @Autowired
+    public Client(@Value("${stats.service.url}") String serverUrl, RestTemplateBuilder builder) {
         super(
                 builder
                         .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl))
@@ -26,13 +31,13 @@ public class Client extends BaseClient {
         return post("/hit", hitDtoCreate);
     }
 
-    public ResponseEntity<Object> get(LocalDateTime start, LocalDateTime end, List<String> uri, Boolean unique) {
+    public List<HitDtoGet> get(LocalDateTime start, LocalDateTime end, List<String> uri, Boolean unique) {
         Map<String, Object> parameters = Map.of(
                 "start", start,
                 "end", end,
                 "uri", uri,
                 "unique", unique
         );
-        return get("/stats?start={start}&end={end]&uri={uri}&unique={unique}", parameters);
+        return (List<HitDtoGet>) get("/stats?start={start}&end={end]&uri={uri}&unique={unique}", parameters);
     }
 }
