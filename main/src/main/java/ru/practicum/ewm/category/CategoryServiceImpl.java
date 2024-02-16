@@ -50,7 +50,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         try {
             return CategoryMapper.mapToCategoryDtoGet(categoryRepository
-                    .save(CategoryMapper.mapToCategoryModelNew(categoryDtoNew)));
+                    .save(category));
         } catch (RuntimeException e) {
             throw new AlreadyAvailableException("Категория " + categoryDtoNew.getName() + " уже есть");
         }
