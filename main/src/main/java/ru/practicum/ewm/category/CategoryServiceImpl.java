@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.category.dto.CategoryDtoGet;
 import ru.practicum.ewm.category.dto.CategoryDtoNew;
 import ru.practicum.ewm.category.dto.CategoryMapper;
+import ru.practicum.ewm.event.EventRepository;
 import ru.practicum.ewm.exception.AlreadyAvailableException;
 import ru.practicum.ewm.exception.NotFoundException;
 
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
+    private final EventRepository eventRepository;
 
     @Override
     public CategoryDtoGet add(CategoryDtoNew categoryDtoNew) {
@@ -32,15 +34,19 @@ public class CategoryServiceImpl implements CategoryService {
     public void delete(int catId) {
         CategoryModel category = categoryRepository.findById(catId)
                 .orElseThrow(() -> new NotFoundException("Категория id=" + catId + " не найдена"));
+
+        boolean flag = eventRepository.existsByCategoryId(catId);
+        if (flag) {
+            throw new AlreadyAvailableException("К категории привязаны события");
+        }
         categoryRepository.deleteById(catId);
-
-
     }
 
     @Override
     public CategoryDtoGet edit(CategoryDtoNew categoryDtoNew, int catId) {
         CategoryModel category = categoryRepository.findById(catId)
                 .orElseThrow(() -> new NotFoundException("Категория id=" + catId + " не найдена"));
+        category.setName(categoryDtoNew.getName());
 
         try {
             return CategoryMapper.mapToCategoryDtoGet(categoryRepository

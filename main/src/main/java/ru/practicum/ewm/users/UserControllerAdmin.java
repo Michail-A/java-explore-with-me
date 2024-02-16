@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.users.dto.UserDtoGet;
 import ru.practicum.ewm.users.dto.UserDtoNew;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -18,7 +19,7 @@ public class UserControllerAdmin {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDtoGet addUser(@RequestBody UserDtoNew userDtoNew) {
+    public UserDtoGet addUser(@RequestBody @Valid UserDtoNew userDtoNew) {
         return userService.addUser(userDtoNew);
     }
 

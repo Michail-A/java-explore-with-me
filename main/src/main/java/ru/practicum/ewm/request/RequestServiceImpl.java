@@ -65,6 +65,9 @@ public class RequestServiceImpl implements RequestService {
         if (eventModel.getInitiator().getId() == userId) {
             throw new AlreadyAvailableException("Событие id= " + eventId + " принадлежит этому же пользователю");
         }
+        if (eventModel.getParticipantLimit() == 0) {
+            requestModel.setStatus(RequestStatus.CONFIRMED);
+        }
 
         return RequestMapper.mapToRequestDto(requestRepository.save(requestModel));
     }

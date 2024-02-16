@@ -22,6 +22,7 @@ import ru.practicum.ewm.users.UserModel;
 import ru.practicum.ewm.users.UserRepository;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ValidationException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -45,7 +46,10 @@ public class EventServiceImpl implements EventService {
 
         UserModel userModel = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(" Пользователь с id=" + userId + " не найден"));
-
+        if (eventDtoNew.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
+            throw new ValidationException("Дата события не может быть раньше," +
+                    " чем через 2 часа от текущей даты");
+        }
         EventModel eventModel = EventMapper.mapToNewEventModel(eventDtoNew, categoryModel, userModel);
 
         return EventMapper.mapToEventFullDto(eventRepository.save(eventModel));
@@ -120,6 +124,11 @@ public class EventServiceImpl implements EventService {
             eventModel.setParticipantLimit(eventUpdateDto.getParticipantLimit());
         }
         if (eventUpdateDto.getEventDate() != null) {
+            if (eventUpdateDto.getEventDate().isBefore(LocalDateTime.now().plusHours(2))
+                    || eventModel.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
+                throw new ValidationException("Дата события не может быть раньше," +
+                        " чем через 2 часа от текущей даты");
+            }
             eventModel.setEventDate(eventUpdateDto.getEventDate());
         }
 
@@ -266,6 +275,15 @@ public class EventServiceImpl implements EventService {
             event.setState(Status.CANCELED);
         }
 
+        if(event.getEventDate().isBefore(LocalDateTime.now())){
+            throw new ValidationException("Некорректная дата");
+        }
+
+        if (event.getPublishedOn() != null && event.getEventDate().isBefore(event.getPublishedOn().plusHours(1))) {
+            throw new AlreadyAvailableException("Дата начала измененного события должна быть " +
+                    " не ранее, чем через час после даты публикации");
+        }
+
         return EventMapper.mapToEventFullDto(eventRepository.save(event));
     }
 
@@ -277,6 +295,9 @@ public class EventServiceImpl implements EventService {
                                                HttpServletRequest httpServletRequest) {
         if (rangeStart == null) {
             rangeStart = LocalDateTime.now();
+        }
+        if (rangeEnd != null && rangeEnd.isBefore(rangeStart)) {
+            throw new ValidationException("Дата конца не может быть раньше даты старта");
         }
         List<EventShortDto> eventShortDtos = new ArrayList<>();
         List<EventModel> events = eventRepository.findAllPublic(text, categoriesIds, paid,

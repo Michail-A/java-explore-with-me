@@ -50,4 +50,6 @@ public interface EventRepository extends JpaRepository<EventModel, Integer> {
 
     @Query("SELECT MIN(e.publishedOn) from EventModel e WHERE e.id in :eventsId")
     Optional<LocalDateTime> getCreatedOn(@Param("eventsId") Collection<Integer> eventIds);
+
+    boolean existsByCategoryId(Integer categoryId);
 }

@@ -34,12 +34,13 @@ public class EventDtoNew {
     @NotNull
     private Location location;
 
+
     private Boolean paid = false;
 
     private Boolean requestModeration = true;
 
     @PositiveOrZero
-    private Integer participantLimit;
+    private Integer participantLimit = 0;
 
     @NotNull
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
