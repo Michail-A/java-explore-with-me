@@ -40,36 +40,34 @@ public class RequestServiceImpl implements RequestService {
         EventModel eventModel = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException(" Событие с id=" + eventId + " не найден"));
 
-
-        RequestModel requestModel = new RequestModel();
-        requestModel.setRequester(userModel);
-        requestModel.setEvent(eventModel);
-        if (eventModel.getRequestModeration()) {
-            requestModel.setStatus(RequestStatus.PENDING);
-        } else {
-            requestModel.setStatus(RequestStatus.CONFIRMED);
+        if (eventModel.getInitiator().getId() == userId) {
+            throw new AlreadyAvailableException("Событие с id= = " + eventId + " принадлежит текущему пользователю");
         }
-        requestModel.setCreateDate(LocalDateTime.now());
+        if (!eventModel.getState().equals(Status.PUBLISHED)) {
+            throw new AlreadyAvailableException("Событие с id= = " + eventId + " не опубликовано");
+        }
+        if (eventModel.getParticipantLimit() > 0 && eventModel.getParticipantLimit() - eventModel.getConfirmedRequests() <= 0) {
+            throw new AlreadyAvailableException("Свободны места в событии кончились");
+        }
 
         if (requestRepository.findByEventIdAndRequesterId(eventId, userId).size() > 0) {
             throw new AlreadyAvailableException("Нельзя отправить повторный запрос");
         }
-        if (eventModel.getParticipantLimit() > 0
-                && eventModel.getParticipantLimit() - eventModel.getConfirmedRequests() <= 0) {
-            throw new AlreadyAvailableException("Количество доступных заявок кончилось");
+
+        RequestModel request = new RequestModel();
+        request.setEvent(eventModel);
+        request.setRequester(userModel);
+        request.setCreateDate(LocalDateTime.now());
+        request.setStatus(RequestStatus.PENDING);
+
+        if (!eventModel.getRequestModeration() || (eventModel.getParticipantLimit() == 0)) {
+            request.setStatus(RequestStatus.CONFIRMED);
+            eventModel.setConfirmedRequests(eventModel.getConfirmedRequests() + 1);
         }
 
-        if (!eventModel.getState().equals(Status.PUBLISHED)) {
-            throw new AlreadyAvailableException("Событие id= " + eventId + " еще не опубликовано");
-        }
-        if (eventModel.getInitiator().getId() == userId) {
-            throw new AlreadyAvailableException("Событие id= " + eventId + " принадлежит этому же пользователю");
-        }
-        if (eventModel.getParticipantLimit() == 0) {
-            requestModel.setStatus(RequestStatus.CONFIRMED);
-        }
+        eventRepository.save(eventModel);
 
-        return RequestMapper.mapToRequestDto(requestRepository.save(requestModel));
+        return RequestMapper.mapToRequestDto(requestRepository.save(request));
     }
 
     @Override

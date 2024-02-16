@@ -152,7 +152,7 @@ public class EventServiceImpl implements EventService {
         eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Событие с id=" + eventId + " не найден"));
 
-        List<RequestModel> requests = requestRepository.findByEventIdAndRequesterId(eventId, userId);
+        List<RequestModel> requests = requestRepository.findByEventIdAndEventInitiatorId(eventId, userId);
         List<RequestDto> requestDtos = new ArrayList<>();
         requestDtos.addAll(requests.stream().map(RequestMapper::mapToRequestDto).collect(Collectors.toList()));
         return requestDtos;
@@ -275,7 +275,7 @@ public class EventServiceImpl implements EventService {
             event.setState(Status.CANCELED);
         }
 
-        if(event.getEventDate().isBefore(LocalDateTime.now())){
+        if (event.getEventDate().isBefore(LocalDateTime.now())) {
             throw new ValidationException("Некорректная дата");
         }
 
@@ -305,7 +305,7 @@ public class EventServiceImpl implements EventService {
 
         sendHit(httpServletRequest.getRequestURI(), httpServletRequest.getRemoteAddr());
 
-        if(events.size()>0 && events !=null) {
+        if (events.size() > 0 && events != null) {
             eventShortDtos = events.stream()
                     .map(EventMapper::mapToEventShortDto).collect(Collectors.toList());
         }
