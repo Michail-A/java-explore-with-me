@@ -24,7 +24,7 @@ public class EventMapper {
         eventModel.setPaid(eventDtoNew.getPaid());
         eventModel.setParticipantLimit(eventDtoNew.getParticipantLimit());
         eventModel.setState(Status.PENDING);
-        eventModel.setViews(0);
+        eventModel.setViews(0L);
         eventModel.setConfirmedRequests(0);
         eventModel.setRequestModeration(eventDtoNew.getRequestModeration());
         return eventModel;

@@ -66,7 +66,7 @@ public class EventModel {
     private Status state;
 
     @Column(name = "views")
-    private Integer views;
+    private Long views;
 
     @Column(name = "confirmed_requests")
     private Integer confirmedRequests;

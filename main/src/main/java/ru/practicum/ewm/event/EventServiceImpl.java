@@ -278,16 +278,22 @@ public class EventServiceImpl implements EventService {
         if (rangeStart == null) {
             rangeStart = LocalDateTime.now();
         }
+        List<EventShortDto> eventShortDtos = new ArrayList<>();
         List<EventModel> events = eventRepository.findAllPublic(text, categoriesIds, paid,
                 rangeStart, rangeEnd, onlyAvailable, PageRequest.of(from / size, size));
 
         sendHit(httpServletRequest.getRequestURI(), httpServletRequest.getRemoteAddr());
 
-        List<EventShortDto> eventShortDtos = events.stream()
-                .map(EventMapper::mapToEventShortDto).collect(Collectors.toList());
-
+        if(events.size()>0 && events !=null) {
+            eventShortDtos = events.stream()
+                    .map(EventMapper::mapToEventShortDto).collect(Collectors.toList());
+        }
         if (!eventShortDtos.isEmpty()) {
-            Map<Integer, Integer> views = getViews(eventShortDtos);
+            List<Integer> eventIds = events.stream()
+                    .map(EventModel::getId)
+                    .collect(Collectors.toList());
+
+            Map<Integer, Long> views = getViews(eventIds);
 
             eventShortDtos.forEach(dto -> dto.setViews(views.get(dto.getId())));
         }
@@ -308,7 +314,7 @@ public class EventServiceImpl implements EventService {
 
         EventFullDto eventFullDto = EventMapper.mapToEventFullDto(event);
 
-        eventFullDto.setViews(client.get(event.getCreatedOn(),
+        eventFullDto.setViews((long) client.get(event.getCreatedOn(),
                 LocalDateTime.now(),
                 List.of("/events/" + eventId),
                 true).size());
@@ -326,32 +332,29 @@ public class EventServiceImpl implements EventService {
         client.create(hitDtoCreate);
     }
 
-    private Map<Integer, Integer> getViews(List<EventShortDto> eventShortDtos) {
-        List<String> uris = eventShortDtos.stream()
-                .map(dto -> "/events/" + dto.getId())
+    private Map<Integer, Long> getViews(List<Integer> eventsId) {
+        List<String> uris = eventsId
+                .stream()
+                .map(id -> "/events/" + id)
                 .collect(Collectors.toList());
 
-        List<Integer> ids = eventShortDtos.stream()
-                .map(EventShortDto::getId)
-                .collect(Collectors.toList());
+        Optional<LocalDateTime> start = eventRepository.getCreatedOn(eventsId);
 
+        Map<Integer, Long> views = new HashMap<>();
 
-        Optional<LocalDateTime> startTime = eventRepository.getCreatedOn(ids);
+        if (start.isPresent()) {
+            List<HitDtoGet> response = client.get(start.get(), LocalDateTime.now(), uris, true);
 
-        List<HitDtoGet> hits = client.get(startTime.get(),
-                LocalDateTime.now(),
-                uris,
-                true);
-
-        Map<Integer, Integer> views = new HashMap<>();
-
-        hits.forEach(hit -> {
-            String uri = hit.getUri();
-            String[] split = uri.split("/");
-            String id = split[2];
-            Integer eventId = Integer.parseInt(id);
-            views.put(eventId, (int) hit.getHits());
-        });
+            response.forEach(dto -> {
+                String uri = dto.getUri();
+                String[] split = uri.split("/");
+                String id = split[2];
+                Integer eventId = Integer.parseInt(id);
+                views.put(eventId, dto.getHits());
+            });
+        } else {
+            eventsId.forEach(el -> views.put(el, 0L));
+        }
 
         return views;
     }

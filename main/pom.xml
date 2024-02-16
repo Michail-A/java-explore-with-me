@@ -77,7 +77,6 @@
             <groupId>ru.practicum</groupId>
             <artifactId>client</artifactId>
             <version>${project.version}</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>

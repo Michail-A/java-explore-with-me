@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import ru.practicum.ewm.event.Location;
 import ru.practicum.ewm.event.StateAction;
 
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
@@ -31,6 +33,7 @@ public class EventUpdateDto {
 
     private Boolean requestModeration;
 
+    @PositiveOrZero
     private Integer participantLimit;
 
     private StateAction stateAction;

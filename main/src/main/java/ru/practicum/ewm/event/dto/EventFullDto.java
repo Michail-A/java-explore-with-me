@@ -25,7 +25,7 @@ public class EventFullDto {
     private Boolean requestModeration;
     private Integer participantLimit;
     private Integer confirmedRequests;
-    private Integer views;
+    private Long views;
     private String state;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")

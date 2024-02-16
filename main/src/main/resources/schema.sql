@@ -21,7 +21,7 @@ create table if not exists events
     title VARCHAR(120) NOT NULL,
     annotation VARCHAR(2000) NOT NULL,
     category_id INTEGER NOT NULL,
-    description text(7000) NOT NULL,
+    description VARCHAR(7000) NOT NULL,
     event_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     initiator_id INTEGER NOT NULL,
     lat NUMERIC NOT NULL,
@@ -30,7 +30,7 @@ create table if not exists events
     request_moderation BOOLEAN DEFAULT TRUE,
     participant_limit INTEGER DEFAULT 0,
     confirmed_requests INTEGER DEFAULT 0,
-    views INTEGER,
+    views BIGINT,
     state VARCHAR,
     create_date TIMESTAMP WITHOUT TIME ZONE,
     published_date TIMESTAMP WITHOUT TIME ZONE,
@@ -62,4 +62,15 @@ create table if not exists compilation
     title  VARCHAR NOT NULL,
     CONSTRAINT PK_COMPILATION PRIMARY KEY (id),
     CONSTRAINT UQ_COMPILATION_TITLE UNIQUE (title)
+);
+
+CREATE TABLE IF NOT EXISTS event_compilation
+(
+    event_id INTEGER NOT NULL,
+    compilation_id INTEGER NOT NULL,
+    CONSTRAINT PK_EVENT_COMPILATION PRIMARY KEY (event_id, compilation_id),
+    CONSTRAINT FK_EVENT_EVENT_COMPILATION
+        FOREIGN KEY (event_id) REFERENCES events (id),
+    CONSTRAINT FK_COMPILATION_EVENT_COMPILATION
+        FOREIGN KEY (compilation_id) REFERENCES compilation (id)
 );
