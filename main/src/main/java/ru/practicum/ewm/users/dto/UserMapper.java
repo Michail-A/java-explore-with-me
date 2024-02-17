@@ -1,21 +1,21 @@
 package ru.practicum.ewm.users.dto;
 
-import ru.practicum.ewm.users.UserModel;
+import ru.practicum.ewm.users.User;
 
 public class UserMapper {
 
-    public static UserModel mapToNewUser(UserDtoNew userDtoNew) {
-        UserModel userModel = new UserModel();
-        userModel.setEmail(userDtoNew.getEmail());
-        userModel.setName(userDtoNew.getName());
-        return userModel;
+    public static User toModel(UserCreateDto userCreateDto) {
+        User user = new User();
+        user.setEmail(userCreateDto.getEmail());
+        user.setName(userCreateDto.getName());
+        return user;
     }
 
-    public static UserDtoGet mapToUserDtoGet(UserModel userModel) {
-        return new UserDtoGet(userModel.getEmail(), userModel.getId(), userModel.getName());
+    public static UserGetDto toUserGetDto(User user) {
+        return new UserGetDto(user.getEmail(), user.getId(), user.getName());
     }
 
-    public static UserShortDto mapToUserShortDto(UserModel userModel) {
-        return new UserShortDto(userModel.getId(), userModel.getName());
+    public static UserShortDto toUserShortDto(User user) {
+        return new UserShortDto(user.getId(), user.getName());
     }
 }

@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Value;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @AllArgsConstructor
 @Value
@@ -17,4 +18,6 @@ public class Error {
     String message;
 
     LocalDateTime timestamp;
+
+    List<String> errors;
 }

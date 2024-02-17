@@ -1,15 +1,15 @@
 package ru.practicum.ewm.category.dto;
 
-import ru.practicum.ewm.category.CategoryModel;
+import ru.practicum.ewm.category.Category;
 
 public class CategoryMapper {
-    public static CategoryModel mapToCategoryModelNew(CategoryDtoNew categoryDtoNew) {
-        CategoryModel categoryModel = new CategoryModel();
-        categoryModel.setName(categoryDtoNew.getName());
-        return categoryModel;
+    public static Category toModel(CategoryCreateDto categoryCreateDto) {
+        Category category = new Category();
+        category.setName(categoryCreateDto.getName());
+        return category;
     }
 
-    public static CategoryDtoGet mapToCategoryDtoGet(CategoryModel categoryModel) {
-        return new CategoryDtoGet(categoryModel.getId(), categoryModel.getName());
+    public static CategoryGetDto toCategoryGetDto(Category category) {
+        return new CategoryGetDto(category.getId(), category.getName());
     }
 }

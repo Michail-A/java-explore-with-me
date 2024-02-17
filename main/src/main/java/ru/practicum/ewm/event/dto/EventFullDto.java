@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.ewm.category.dto.CategoryDtoGet;
+import ru.practicum.ewm.category.dto.CategoryGetDto;
 import ru.practicum.ewm.event.Location;
 import ru.practicum.ewm.users.dto.UserShortDto;
 
@@ -17,7 +17,7 @@ public class EventFullDto {
     private Integer id;
     private String title;
     private String annotation;
-    private CategoryDtoGet category;
+    private CategoryGetDto category;
     private String description;
     private UserShortDto initiator;
     private Location location;

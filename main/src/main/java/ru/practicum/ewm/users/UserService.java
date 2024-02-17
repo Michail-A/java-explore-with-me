@@ -1,15 +1,16 @@
 package ru.practicum.ewm.users;
 
-import ru.practicum.ewm.users.dto.UserDtoGet;
-import ru.practicum.ewm.users.dto.UserDtoNew;
+import org.springframework.data.domain.Pageable;
+import ru.practicum.ewm.users.dto.UserGetDto;
+import ru.practicum.ewm.users.dto.UserCreateDto;
 
 import java.util.List;
 
 public interface UserService {
 
-    UserDtoGet addUser(UserDtoNew userDtoNew);
+    UserGetDto create(UserCreateDto userCreateDto);
 
-    List<UserDtoGet> getUsers(List<Integer> ids, int from, int size);
+    List<UserGetDto> get(List<Integer> ids, Pageable page);
 
-    void deleteUser(int userId);
+    void delete(int userId);
 }

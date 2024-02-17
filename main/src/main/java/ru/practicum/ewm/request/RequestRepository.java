@@ -4,12 +4,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface RequestRepository extends JpaRepository<RequestModel, Integer> {
-    List<RequestModel> findByEventIdAndEventInitiatorId(int eventId, int initiatorId);
+public interface RequestRepository extends JpaRepository<Request, Integer> {
+    List<Request> findByEventIdAndEventInitiatorId(int eventId, int initiatorId);
 
-    List<RequestModel> findByEventId(int eventId);
+    List<Request> findByEventId(int eventId);
 
-    List<RequestModel> findByRequesterId(int requesterId);
+    List<Request> findByRequesterId(int requesterId);
 
-    List<RequestModel> findByEventIdAndRequesterId(int eventId, int userId);
+    List<Request> findByEventIdAndRequesterId(int eventId, int userId);
 }

@@ -1,6 +1,6 @@
 package ru.practicum.ewm.request.dto;
 
-import ru.practicum.ewm.request.RequestModel;
+import ru.practicum.ewm.request.Request;
 import ru.practicum.ewm.request.RequestStatus;
 
 import java.util.ArrayList;
@@ -8,27 +8,27 @@ import java.util.List;
 
 public class RequestMapper {
 
-    public static RequestDto mapToRequestDto(RequestModel requestModel) {
+    public static RequestDto toRequestDto(Request request) {
         RequestDto requestDto = new RequestDto();
-        requestDto.setId(requestModel.getId());
-        requestDto.setRequester(requestModel.getRequester().getId());
-        requestDto.setStatus(requestModel.getStatus());
-        requestDto.setEvent(requestModel.getEvent().getId());
-        requestDto.setCreated(requestModel.getCreateDate());
+        requestDto.setId(request.getId());
+        requestDto.setRequester(request.getRequester().getId());
+        requestDto.setStatus(request.getStatus());
+        requestDto.setEvent(request.getEvent().getId());
+        requestDto.setCreated(request.getCreateDate());
         return requestDto;
     }
 
-    public static RequestStatusUpdateResult mapToRequestStatusUpdateResult(List<RequestModel> requests) {
+    public static RequestStatusUpdateResult toRequestStatusUpdateResult(List<Request> requests) {
         List<RequestDto> confirmedRequests = new ArrayList<>();
         List<RequestDto> rejectedRequests = new ArrayList<>();
         RequestStatusUpdateResult requestStatusUpdateResult = new RequestStatusUpdateResult();
 
-        for (RequestModel request : requests) {
+        for (Request request : requests) {
             if (request.getStatus().equals(RequestStatus.CONFIRMED)) {
-                confirmedRequests.add(RequestMapper.mapToRequestDto(request));
+                confirmedRequests.add(RequestMapper.toRequestDto(request));
             }
             if (request.getStatus().equals(RequestStatus.REJECTED)) {
-                rejectedRequests.add(RequestMapper.mapToRequestDto(request));
+                rejectedRequests.add(RequestMapper.toRequestDto(request));
             }
         }
         requestStatusUpdateResult.setConfirmedRequests(confirmedRequests);

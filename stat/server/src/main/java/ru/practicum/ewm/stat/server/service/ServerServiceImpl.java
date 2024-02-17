@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import ru.practicum.ewm.stat.dto.HitDtoCreate;
-import ru.practicum.ewm.stat.dto.HitDtoGet;
+import ru.practicum.ewm.stat.dto.HitCreateDto;
+import ru.practicum.ewm.stat.dto.HitGetDto;
 import ru.practicum.ewm.stat.server.mapper.Mapper;
 import ru.practicum.ewm.stat.server.model.HitModel;
 import ru.practicum.ewm.stat.server.repository.ServerRepository;
@@ -20,24 +20,24 @@ public class ServerServiceImpl implements ServerService {
     private final ServerRepository serverRepository;
 
     @Override
-    public HitModel create(HitDtoCreate hitDtoCreate) {
-        return serverRepository.save(Mapper.mapToNewHitModel(hitDtoCreate));
+    public HitModel create(HitCreateDto hitCreateDto) {
+        return serverRepository.save(Mapper.mapToNewHitModel(hitCreateDto));
     }
 
     @Override
-    public List<HitDtoGet> getStats(LocalDateTime start, LocalDateTime end, List<String> uri, boolean unique) {
+    public List<HitGetDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uri, boolean unique) {
         if (start.isAfter(end)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Старт не может быть позже конца");
         }
-        List<HitDtoGet> stats = new ArrayList<>();
+        List<HitGetDto> stats = new ArrayList<>();
         if (unique) {
             stats = serverRepository.getByUnique(start, end);
         } else {
             stats = serverRepository.getByNoUnique(start, end);
         }
-        List<HitDtoGet> finalStat = new ArrayList<>();
+        List<HitGetDto> finalStat = new ArrayList<>();
         if (uri != null) {
-            for (HitDtoGet stat : stats) {
+            for (HitGetDto stat : stats) {
                 if (uri.contains(stat.getUri())) {
                     finalStat.add(stat);
                 }

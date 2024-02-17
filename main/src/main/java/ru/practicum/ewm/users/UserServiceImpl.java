@@ -1,12 +1,13 @@
 package ru.practicum.ewm.users;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.exception.AlreadyAvailableException;
 import ru.practicum.ewm.exception.NotFoundException;
-import ru.practicum.ewm.users.dto.UserDtoGet;
-import ru.practicum.ewm.users.dto.UserDtoNew;
+import ru.practicum.ewm.users.dto.UserGetDto;
+import ru.practicum.ewm.users.dto.UserCreateDto;
 import ru.practicum.ewm.users.dto.UserMapper;
 
 import java.util.ArrayList;
@@ -20,33 +21,36 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     @Override
-    public UserDtoGet addUser(UserDtoNew userDtoNew) {
+    @Transactional
+    public UserGetDto create(UserCreateDto userCreateDto) {
         try {
-            return UserMapper.mapToUserDtoGet(userRepository.save(UserMapper.mapToNewUser(userDtoNew)));
+            return UserMapper.toUserGetDto(userRepository.save(UserMapper.toModel(userCreateDto)));
         } catch (RuntimeException e) {
-            throw new AlreadyAvailableException("Пользователь с Email " + userDtoNew.getEmail() + " уже есть");
+            throw new AlreadyAvailableException("Пользователь с Email " + userCreateDto.getEmail() + " уже есть");
         }
     }
 
     @Override
-    public List<UserDtoGet> getUsers(List<Integer> ids, int from, int size) {
-        List<UserModel> users = new ArrayList<>();
+    @Transactional(readOnly = true)
+    public List<UserGetDto> get(List<Integer> ids, Pageable page) {
+        List<User> users = new ArrayList<>();
 
         if (ids != null) {
             users = userRepository.findAllById(ids);
 
         } else {
-            users = userRepository.findAll(PageRequest.of(from / size, size)).getContent();
+            users = userRepository.findAll(page).getContent();
         }
 
         return users.stream()
-                .map(UserMapper::mapToUserDtoGet)
+                .map(UserMapper::toUserGetDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public void deleteUser(int userId) {
-        UserModel user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(" Пользователь с id="
+    @Transactional
+    public void delete(int userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(" Пользователь с id="
                 + userId + " не найден"));
 
         userRepository.deleteById(userId);

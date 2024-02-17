@@ -1,5 +1,6 @@
 package ru.practicum.ewm.exception;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.validation.ValidationException;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RestControllerAdvice
 public class ErrorHandler {
@@ -20,10 +22,11 @@ public class ErrorHandler {
                 .reason(HttpStatus.NOT_FOUND.getReasonPhrase())
                 .message(e.getMessage())
                 .timestamp(LocalDateTime.now())
+                .errors(List.of(e.toString()))
                 .build();
     }
 
-    @ExceptionHandler({AlreadyAvailableException.class})
+    @ExceptionHandler({AlreadyAvailableException.class, DataIntegrityViolationException.class})
     @ResponseStatus(HttpStatus.CONFLICT)
     public Error handleAlreadyExists(final RuntimeException e) {
         return Error.builder()
@@ -31,6 +34,7 @@ public class ErrorHandler {
                 .reason(HttpStatus.CONFLICT.getReasonPhrase())
                 .message(e.getMessage())
                 .timestamp(LocalDateTime.now())
+                .errors(List.of(e.toString()))
                 .build();
     }
 
@@ -42,6 +46,7 @@ public class ErrorHandler {
                 .reason(HttpStatus.BAD_REQUEST.getReasonPhrase())
                 .message(e.getMessage())
                 .timestamp(LocalDateTime.now())
+                .errors(List.of(e.toString()))
                 .build();
     }
 
@@ -53,6 +58,7 @@ public class ErrorHandler {
                 .reason(HttpStatus.BAD_REQUEST.getReasonPhrase())
                 .message(e.getMessage())
                 .timestamp(LocalDateTime.now())
+                .errors(List.of(e.toString()))
                 .build();
     }
 }

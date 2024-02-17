@@ -1,7 +1,7 @@
 package ru.practicum.ewm.compilation.dto;
 
-import ru.practicum.ewm.compilation.CompilationModel;
-import ru.practicum.ewm.event.EventModel;
+import ru.practicum.ewm.compilation.Compilation;
+import ru.practicum.ewm.event.Event;
 import ru.practicum.ewm.event.dto.EventMapper;
 
 import java.util.Set;
@@ -9,28 +9,28 @@ import java.util.stream.Collectors;
 
 public class CompilationMapper {
 
-    public static CompilationModel mapToNewCompilationModel(CompilationDtoNew compilationDtoNew,
-                                                            Set<EventModel> events) {
-        CompilationModel compilationModel = new CompilationModel();
-        compilationModel.setTitle(compilationDtoNew.getTitle());
-        compilationModel.setEvents(events);
-        if (compilationDtoNew.getPinned() == null) {
-            compilationModel.setPinned(false);
+    public static Compilation toModel(CompilationCreateDto compilationCreateDto,
+                                      Set<Event> events) {
+        Compilation compilation = new Compilation();
+        compilation.setTitle(compilationCreateDto.getTitle());
+        compilation.setEvents(events);
+        if (compilationCreateDto.getPinned() == null) {
+            compilation.setPinned(false);
         } else {
-            compilationModel.setPinned(compilationDtoNew.getPinned());
+            compilation.setPinned(compilationCreateDto.getPinned());
         }
-        return compilationModel;
+        return compilation;
     }
 
-    public static CompilationDto mapToCompilationDto(CompilationModel compilationModel) {
+    public static CompilationDto toCompilationDto(Compilation compilation) {
         CompilationDto compilationDto = new CompilationDto();
-        compilationDto.setId(compilationModel.getId());
-        compilationDto.setEvents(compilationModel.getEvents()
+        compilationDto.setId(compilation.getId());
+        compilationDto.setEvents(compilation.getEvents()
                 .stream()
-                .map(EventMapper::mapToEventShortDto)
+                .map(EventMapper::toEventShortDto)
                 .collect(Collectors.toList()));
-        compilationDto.setPinned(compilationModel.getPinned());
-        compilationDto.setTitle(compilationModel.getTitle());
+        compilationDto.setPinned(compilation.getPinned());
+        compilationDto.setTitle(compilation.getTitle());
         return compilationDto;
     }
 }
