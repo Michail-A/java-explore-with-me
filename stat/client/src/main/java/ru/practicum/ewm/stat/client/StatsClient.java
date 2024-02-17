@@ -24,7 +24,7 @@ public class StatsClient {
     private final RestTemplate restTemplate;
 
 
-    public void create(HitCreateDto hitCreateDto) throws HttpStatusCodeException {
+    public void create(HitCreateDto hitCreateDto) {
         restTemplate.postForLocation(serverUrl.concat("/hit"), hitCreateDto);
     }
 
