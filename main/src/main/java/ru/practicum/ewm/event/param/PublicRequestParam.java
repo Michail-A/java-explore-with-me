@@ -8,7 +8,7 @@ import ru.practicum.ewm.event.EventSort;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PublicRequestParam extends RequestParam{
+public class PublicRequestParam extends RequestParam {
     private String text;
     private Boolean paid;
     private Boolean onlyAvailable;
