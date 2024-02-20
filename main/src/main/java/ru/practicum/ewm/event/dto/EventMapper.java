@@ -24,12 +24,11 @@ public class EventMapper {
         event.setPaid(eventCreateDto.getPaid());
         event.setParticipantLimit(eventCreateDto.getParticipantLimit());
         event.setState(Status.PENDING);
-        event.setConfirmedRequests(0);
         event.setRequestModeration(eventCreateDto.getRequestModeration());
         return event;
     }
 
-    public static EventFullDto tooEventFullDto(Event event) {
+    public static EventFullDto toEventFullDto(Event event, int confirmedRequests) {
         EventFullDto eventFullDto = new EventFullDto();
         eventFullDto.setId(event.getId());
         eventFullDto.setTitle(event.getTitle());
@@ -41,7 +40,7 @@ public class EventMapper {
         eventFullDto.setPaid(event.getPaid());
         eventFullDto.setRequestModeration(event.getRequestModeration());
         eventFullDto.setParticipantLimit(event.getParticipantLimit());
-        eventFullDto.setConfirmedRequests(event.getConfirmedRequests());
+        eventFullDto.setConfirmedRequests(confirmedRequests);
         eventFullDto.setState(event.getState().toString());
         eventFullDto.setEventDate(event.getEventDate());
         eventFullDto.setCreatedOn(event.getCreatedOn());
@@ -51,7 +50,7 @@ public class EventMapper {
         return eventFullDto;
     }
 
-    public static EventShortDto toEventShortDto(Event event) {
+    public static EventShortDto toEventShortDto(Event event, int confirmedRequests) {
         EventShortDto eventShortDto = new EventShortDto();
         eventShortDto.setId(event.getId());
         eventShortDto.setTitle(event.getTitle());
@@ -59,7 +58,7 @@ public class EventMapper {
         eventShortDto.setCategory(CategoryMapper.toCategoryGetDto(event.getCategory()));
         eventShortDto.setInitiator(UserMapper.toUserShortDto(event.getInitiator()));
         eventShortDto.setPaid(event.getPaid());
-        eventShortDto.setConfirmedRequests(eventShortDto.getConfirmedRequests());
+        eventShortDto.setConfirmedRequests(confirmedRequests);
         eventShortDto.setEventDate(event.getEventDate());
         return eventShortDto;
     }

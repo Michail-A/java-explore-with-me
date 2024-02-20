@@ -29,7 +29,6 @@ create table if not exists events
     paid BOOLEAN DEFAULT FALSE,
     request_moderation BOOLEAN DEFAULT TRUE,
     participant_limit INTEGER DEFAULT 0,
-    confirmed_requests INTEGER DEFAULT 0,
     state VARCHAR,
     create_date TIMESTAMP WITHOUT TIME ZONE,
     published_date TIMESTAMP WITHOUT TIME ZONE,

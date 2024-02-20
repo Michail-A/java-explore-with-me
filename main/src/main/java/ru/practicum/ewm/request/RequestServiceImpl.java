@@ -52,7 +52,9 @@ public class RequestServiceImpl implements RequestService {
         if (!event.getState().equals(Status.PUBLISHED)) {
             throw new AlreadyAvailableException("Событие с id= = " + eventId + " не опубликовано");
         }
-        if (event.getParticipantLimit() > 0 && event.getParticipantLimit() - event.getConfirmedRequests() <= 0) {
+        List<Request> requests = requestRepository.findByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
+
+        if (event.getParticipantLimit() > 0 && ((event.getParticipantLimit() - requests.size()) <= 0)) {
             throw new AlreadyAvailableException("Свободны места в событии кончились");
         }
 
@@ -68,10 +70,7 @@ public class RequestServiceImpl implements RequestService {
 
         if (!event.getRequestModeration() || (event.getParticipantLimit() == 0)) {
             request.setStatus(RequestStatus.CONFIRMED);
-            event.setConfirmedRequests(event.getConfirmedRequests() + 1);
         }
-
-        eventRepository.save(event);
 
         return RequestMapper.toRequestDto(requestRepository.save(request));
     }
@@ -113,7 +112,8 @@ public class RequestServiceImpl implements RequestService {
         if (event.getParticipantLimit() == 0 || !event.getRequestModeration()) {
             throw new AlreadyAvailableException("Модерация заявок не требуется");
         }
-        if (event.getParticipantLimit() - event.getConfirmedRequests() <= 0) {
+        List<Request> requests = requestRepository.findByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
+        if (event.getParticipantLimit() - requests.size() <= 0) {
             throw new AlreadyAvailableException("Достигнут лимит заявок на событие");
         }
 
@@ -129,14 +129,10 @@ public class RequestServiceImpl implements RequestService {
         if (requestStatusUpdateRequest.getStatus().equals(RequestStatus.CONFIRMED)) {
             for (Request request : requestsByIds) {
 
-                if (event.getParticipantLimit() - event.getConfirmedRequests() <= 0) {
+                if (event.getParticipantLimit() - requests.size() <= 0) {
                     request.setStatus(RequestStatus.REJECTED);
                 }
-
                 request.setStatus(RequestStatus.CONFIRMED);
-                event.setConfirmedRequests(event.getConfirmedRequests() + 1);
-
-                requestRepository.save(request);
             }
         }
 

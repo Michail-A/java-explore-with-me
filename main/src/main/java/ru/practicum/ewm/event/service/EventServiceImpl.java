@@ -6,7 +6,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.category.Category;
 import ru.practicum.ewm.category.CategoryRepository;
-import ru.practicum.ewm.event.*;
+import ru.practicum.ewm.event.Event;
+import ru.practicum.ewm.event.EventRepository;
+import ru.practicum.ewm.event.StateAction;
+import ru.practicum.ewm.event.Status;
 import ru.practicum.ewm.event.dto.*;
 import ru.practicum.ewm.event.param.AdminRequestParam;
 import ru.practicum.ewm.event.param.PublicRequestParam;
@@ -15,21 +18,17 @@ import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.request.Request;
 import ru.practicum.ewm.request.RequestRepository;
 import ru.practicum.ewm.request.RequestStatus;
-import ru.practicum.ewm.request.dto.RequestDto;
-import ru.practicum.ewm.request.dto.RequestMapper;
-import ru.practicum.ewm.request.dto.RequestStatusUpdateRequest;
-import ru.practicum.ewm.request.dto.RequestStatusUpdateResult;
 import ru.practicum.ewm.stat.client.StatsClient;
-import ru.practicum.ewm.stat.dto.HitCreateDto;
 import ru.practicum.ewm.stat.dto.HitGetDto;
 import ru.practicum.ewm.users.User;
 import ru.practicum.ewm.users.UserRepository;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.ValidationException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.groupingBy;
 
 @Service
 @RequiredArgsConstructor
@@ -57,7 +56,7 @@ public class EventServiceImpl implements EventService {
         }
         Event event = EventMapper.toModel(eventCreateDto, category, user);
 
-        return EventMapper.tooEventFullDto(eventRepository.save(event));
+        return EventMapper.toEventFullDto(eventRepository.save(event), 0);
     }
 
     @Override
@@ -67,8 +66,17 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new NotFoundException(" Пользователь с id=" + userId + " не найден"));
         List<Event> events = eventRepository.findByInitiatorIdOrderByIdDesc(userId, page);
 
+        List<Integer> eventsIds = events.stream()
+                .map(event -> event.getId())
+                .collect(Collectors.toList());
+
+        List<Request> requests = requestRepository.findByEventIdInAndStatus(eventsIds, RequestStatus.CONFIRMED);
+        Map<Integer, List<Request>> eventRequests = requests.stream().collect(groupingBy(r -> r.getEvent().getId()));
+
         return events.stream()
-                .map(EventMapper::toEventShortDto)
+                .map(event -> EventMapper.toEventShortDto(event, Objects.isNull(eventRequests.get(event.getId()))
+                        ? 0
+                        : eventRequests.get(event.getId()).size()))
                 .collect(Collectors.toList());
     }
 
@@ -77,9 +85,10 @@ public class EventServiceImpl implements EventService {
     public EventFullDto getByIdByUser(int userId, int eventId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Событие с id=" + eventId + " не найден"));
+        List<Request> requests = requestRepository.findByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
 
         if (event.getInitiator().getId() == userId) {
-            return EventMapper.tooEventFullDto(event);
+            return EventMapper.toEventFullDto(event, requests.size());
         }
         throw new NotFoundException("Событие с id=" + eventId + " не найден");
     }
@@ -149,7 +158,7 @@ public class EventServiceImpl implements EventService {
             event.setState(Status.PENDING);
         }
 
-        return EventMapper.tooEventFullDto(eventRepository.save(event));
+        return EventMapper.toEventFullDto(eventRepository.save(event), 0);
     }
 
     @Override
@@ -158,7 +167,18 @@ public class EventServiceImpl implements EventService {
         List<Event> events = eventRepository.findByAdmin(param.getUsers(), param.getStates(), param.getCategories(),
                 param.getStart(), param.getEnd(), param.getPage());
 
-        return events.stream().map(EventMapper::tooEventFullDto).collect(Collectors.toList());
+        List<Integer> eventsIds = events.stream()
+                .map(event -> event.getId())
+                .collect(Collectors.toList());
+
+        List<Request> requests = requestRepository.findByEventIdInAndStatus(eventsIds, RequestStatus.CONFIRMED);
+        Map<Integer, List<Request>> eventRequests = requests.stream().collect(groupingBy(r -> r.getEvent().getId()));
+
+        return events.stream()
+                .map(event -> EventMapper.toEventFullDto(event, Objects.isNull(eventRequests.get(event.getId()))
+                        ? 0
+                        : eventRequests.get(event.getId()).size()))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -230,7 +250,7 @@ public class EventServiceImpl implements EventService {
                     " не ранее, чем через час после даты публикации");
         }
 
-        return EventMapper.tooEventFullDto(eventRepository.save(event));
+        return EventMapper.toEventFullDto(eventRepository.save(event), 0);
     }
 
     @Override
@@ -246,9 +266,19 @@ public class EventServiceImpl implements EventService {
         List<Event> events = eventRepository.findAllPublic(param.getText(), param.getCategories(), param.getPaid(),
                 param.getStart(), param.getEnd(), param.getOnlyAvailable(), param.getPage());
 
+        List<Integer> eventsIds = events.stream()
+                .map(event -> event.getId())
+                .collect(Collectors.toList());
+
+        List<Request> requests = requestRepository.findByEventIdInAndStatus(eventsIds, RequestStatus.CONFIRMED);
+        Map<Integer, List<Request>> eventRequests = requests.stream().collect(groupingBy(r -> r.getEvent().getId()));
+
         if (events.size() > 0 && events != null) {
             eventShortDtos = events.stream()
-                    .map(EventMapper::toEventShortDto).collect(Collectors.toList());
+                    .map(event -> EventMapper.toEventShortDto(event, Objects.isNull(eventRequests.get(event.getId()))
+                            ? 0
+                            : eventRequests.get(event.getId()).size()))
+                    .collect(Collectors.toList());
         }
         if (!eventShortDtos.isEmpty()) {
             List<Integer> eventIds = events.stream()
@@ -272,9 +302,9 @@ public class EventServiceImpl implements EventService {
         if (event.getState() != Status.PUBLISHED) {
             throw new NotFoundException("Событие id=" + eventId + " еще не опубликовано");
         }
+        List<Request> requests = requestRepository.findByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
 
-
-        EventFullDto eventFullDto = EventMapper.tooEventFullDto(event);
+        EventFullDto eventFullDto = EventMapper.toEventFullDto(event, requests.size());
 
         eventFullDto.setViews((long) statsClient.get(event.getCreatedOn(),
                 LocalDateTime.now(),
