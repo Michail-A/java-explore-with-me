@@ -4,10 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.ewm.exception.AlreadyAvailableException;
 import ru.practicum.ewm.exception.NotFoundException;
-import ru.practicum.ewm.users.dto.UserGetDto;
 import ru.practicum.ewm.users.dto.UserCreateDto;
+import ru.practicum.ewm.users.dto.UserGetDto;
 import ru.practicum.ewm.users.dto.UserMapper;
 
 import java.util.ArrayList;
@@ -23,11 +22,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserGetDto create(UserCreateDto userCreateDto) {
-        try {
-            return UserMapper.toUserGetDto(userRepository.save(UserMapper.toModel(userCreateDto)));
-        } catch (RuntimeException e) {
-            throw new AlreadyAvailableException("Пользователь с Email " + userCreateDto.getEmail() + " уже есть");
-        }
+        return UserMapper.toUserGetDto(userRepository.save(UserMapper.toModel(userCreateDto)));
     }
 
     @Override

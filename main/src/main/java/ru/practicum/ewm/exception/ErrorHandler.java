@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.validation.ValidationException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -22,7 +24,7 @@ public class ErrorHandler {
                 .reason(HttpStatus.NOT_FOUND.getReasonPhrase())
                 .message(e.getMessage())
                 .timestamp(LocalDateTime.now())
-                .errors(List.of(e.toString()))
+                .errors(List.of(printStackTrace(e)))
                 .build();
     }
 
@@ -34,7 +36,7 @@ public class ErrorHandler {
                 .reason(HttpStatus.CONFLICT.getReasonPhrase())
                 .message(e.getMessage())
                 .timestamp(LocalDateTime.now())
-                .errors(List.of(e.toString()))
+                .errors(List.of(printStackTrace(e)))
                 .build();
     }
 
@@ -46,7 +48,7 @@ public class ErrorHandler {
                 .reason(HttpStatus.BAD_REQUEST.getReasonPhrase())
                 .message(e.getMessage())
                 .timestamp(LocalDateTime.now())
-                .errors(List.of(e.toString()))
+                .errors(List.of(printStackTrace(e)))
                 .build();
     }
 
@@ -58,7 +60,14 @@ public class ErrorHandler {
                 .reason(HttpStatus.BAD_REQUEST.getReasonPhrase())
                 .message(e.getMessage())
                 .timestamp(LocalDateTime.now())
-                .errors(List.of(e.toString()))
+                .errors(List.of(printStackTrace(e)))
                 .build();
+    }
+
+    private static String printStackTrace(Throwable e) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        e.printStackTrace(pw);
+        return sw.toString();
     }
 }
