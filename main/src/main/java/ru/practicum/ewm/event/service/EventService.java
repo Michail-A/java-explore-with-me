@@ -7,6 +7,8 @@ import ru.practicum.ewm.event.dto.EventCreateDto;
 import ru.practicum.ewm.event.dto.EventFullDto;
 import ru.practicum.ewm.event.dto.EventShortDto;
 import ru.practicum.ewm.event.dto.EventUpdateDto;
+import ru.practicum.ewm.event.param.AdminRequestParam;
+import ru.practicum.ewm.event.param.PublicRequestParam;
 import ru.practicum.ewm.request.dto.RequestDto;
 import ru.practicum.ewm.request.dto.RequestStatusUpdateRequest;
 import ru.practicum.ewm.request.dto.RequestStatusUpdateResult;
@@ -30,15 +32,11 @@ public interface EventService {
     RequestStatusUpdateResult updateRequestStatus(RequestStatusUpdateRequest requestStatusUpdateRequest,
                                                   int eventId, int userId);
 
-    List<EventFullDto> getAllForAdmin(LocalDateTime start, LocalDateTime end, Collection<Integer> users,
-                                      Collection<Integer> categories, Collection<Status> states, Pageable page);
+    List<EventFullDto> getAll(AdminRequestParam param);
 
     EventFullDto updateByAdmin(EventUpdateDto eventUpdateDto, int eventId);
 
-    List<EventShortDto> getAllForPublic(String text, List<Integer> categoriesIds, Boolean paid,
-                                        LocalDateTime rangeStart, LocalDateTime rangeEnd,
-                                        boolean onlyAvailable, EventSort sort, Pageable page,
-                                        HttpServletRequest httpServletRequest);
+    List<EventShortDto> getAll(PublicRequestParam param);
 
-    EventFullDto getByIdForPublic(int eventId, HttpServletRequest httpRequest);
+    EventFullDto getByIdForPublic(int eventId);
 }

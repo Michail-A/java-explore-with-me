@@ -8,6 +8,8 @@ import ru.practicum.ewm.category.Category;
 import ru.practicum.ewm.category.CategoryRepository;
 import ru.practicum.ewm.event.*;
 import ru.practicum.ewm.event.dto.*;
+import ru.practicum.ewm.event.param.AdminRequestParam;
+import ru.practicum.ewm.event.param.PublicRequestParam;
 import ru.practicum.ewm.exception.AlreadyAvailableException;
 import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.request.Request;
@@ -215,11 +217,9 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<EventFullDto> getAllForAdmin(LocalDateTime start, LocalDateTime end,
-                                             Collection<Integer> users, Collection<Integer> categories,
-                                             Collection<Status> states, Pageable page) {
-        List<Event> events = eventRepository.findByAdmin(users, states, categories,
-                start, end, page);
+    public List<EventFullDto> getAll(AdminRequestParam param) {
+        List<Event> events = eventRepository.findByAdmin(param.getUsers(), param.getStates(), param.getCategories(),
+                param.getStart(), param.getEnd(), param.getPage());
 
         return events.stream().map(EventMapper::tooEventFullDto).collect(Collectors.toList());
     }
@@ -298,20 +298,16 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<EventShortDto> getAllForPublic(String text, List<Integer> categoriesIds,
-                                               Boolean paid, LocalDateTime rangeStart,
-                                               LocalDateTime rangeEnd, boolean onlyAvailable,
-                                               EventSort sort, Pageable page,
-                                               HttpServletRequest httpServletRequest) {
-        if (rangeStart == null) {
-            rangeStart = LocalDateTime.now();
+    public List<EventShortDto> getAll(PublicRequestParam param) {
+        if (param.getStart() == null) {
+            param.setStart(LocalDateTime.now());
         }
-        if (rangeEnd != null && rangeEnd.isBefore(rangeStart)) {
+        if (param.getEnd() != null && param.getEnd().isBefore(param.getStart())) {
             throw new ValidationException("Дата конца не может быть раньше даты старта");
         }
         List<EventShortDto> eventShortDtos = new ArrayList<>();
-        List<Event> events = eventRepository.findAllPublic(text, categoriesIds, paid,
-                rangeStart, rangeEnd, onlyAvailable, page);
+        List<Event> events = eventRepository.findAllPublic(param.getText(), param.getCategories(), param.getPaid(),
+                param.getStart(), param.getEnd(), param.getOnlyAvailable(), param.getPage());
 
         if (events.size() > 0 && events != null) {
             eventShortDtos = events.stream()
@@ -327,13 +323,12 @@ public class EventServiceImpl implements EventService {
             eventShortDtos.forEach(dto -> dto.setViews(views.get(dto.getId())));
 
         }
-        sendHit(httpServletRequest.getRequestURI(), httpServletRequest.getRemoteAddr());
         return eventShortDtos;
     }
 
     @Override
     @Transactional(readOnly = true)
-    public EventFullDto getByIdForPublic(int eventId, HttpServletRequest httpServletRequest) {
+    public EventFullDto getByIdForPublic(int eventId) {
         Event event = eventRepository.findById(eventId).orElseThrow(() ->
                 new NotFoundException("Событие с id=" + eventId + " не найден"));
 
@@ -341,7 +336,6 @@ public class EventServiceImpl implements EventService {
             throw new NotFoundException("Событие id=" + eventId + " еще не опубликовано");
         }
 
-        sendHit(httpServletRequest.getRequestURI(), httpServletRequest.getRemoteAddr());
 
         EventFullDto eventFullDto = EventMapper.tooEventFullDto(event);
 
@@ -351,16 +345,6 @@ public class EventServiceImpl implements EventService {
                 true).size());
 
         return eventFullDto;
-    }
-
-    private void sendHit(String uri, String ip) {
-        HitCreateDto hitCreateDto = new HitCreateDto();
-        hitCreateDto.setApp("ewm-main-service");
-        hitCreateDto.setUri(uri);
-        hitCreateDto.setIp(ip);
-        hitCreateDto.setTimestamp(LocalDateTime.now());
-
-        statsClient.create(hitCreateDto);
     }
 
     private Map<Integer, Long> getViews(List<Integer> eventsId) {

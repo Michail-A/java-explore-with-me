@@ -1,6 +1,5 @@
 package ru.practicum.ewm.stat.client;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
@@ -16,13 +15,14 @@ import java.util.Map;
 import java.util.Objects;
 
 @Service
-@RequiredArgsConstructor
 public class StatsClient {
-    @Value("${statistics.server.address}")
     private String serverUrl;
+    private RestTemplate restTemplate;
 
-    private final RestTemplate restTemplate;
-
+    public StatsClient(@Value("${statistics.server.address}") String serverUrl) {
+        this.restTemplate = new RestTemplate();
+        this.serverUrl = serverUrl;
+    }
 
     public void create(HitCreateDto hitCreateDto) {
         restTemplate.postForLocation(serverUrl.concat("/hit"), hitCreateDto);

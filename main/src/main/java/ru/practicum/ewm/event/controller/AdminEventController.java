@@ -6,10 +6,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.ewm.event.service.EventService;
 import ru.practicum.ewm.event.Status;
 import ru.practicum.ewm.event.dto.EventFullDto;
 import ru.practicum.ewm.event.dto.EventUpdateDto;
+import ru.practicum.ewm.event.param.AdminRequestParam;
+import ru.practicum.ewm.event.service.EventService;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
@@ -26,9 +27,9 @@ public class AdminEventController {
     @GetMapping
     public List<EventFullDto> getAll(
             @RequestParam(required = false, name = "rangeStart")
-            @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime start,
+            @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
             @RequestParam(required = false, name = "rangeEnd")
-            @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end,
+            @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
             @RequestParam(required = false) Collection<Integer> users,
             @RequestParam(required = false) Collection<Integer> categories,
             @RequestParam(required = false) Collection<Status> states,
@@ -36,7 +37,15 @@ public class AdminEventController {
             @RequestParam(defaultValue = "10") int size) {
 
         Pageable page = PageRequest.of(from / size, size);
-        return eventService.getAllForAdmin(start, end, users, categories, states, page);
+       AdminRequestParam param = new AdminRequestParam();
+        param.setStart(rangeStart);
+        param.setEnd(rangeEnd);
+        param.setUsers(users);
+        param.setCategories(categories);
+        param.setStates(states);
+        param.setPage(page);
+
+        return eventService.getAll(param);
     }
 
     @PatchMapping("/{eventId}")
