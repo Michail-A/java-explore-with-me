@@ -10,10 +10,13 @@ import ru.practicum.ewm.exception.AlreadyAvailableException;
 import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.request.dto.RequestDto;
 import ru.practicum.ewm.request.dto.RequestMapper;
+import ru.practicum.ewm.request.dto.RequestStatusUpdateRequest;
+import ru.practicum.ewm.request.dto.RequestStatusUpdateResult;
 import ru.practicum.ewm.users.User;
 import ru.practicum.ewm.users.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -83,5 +86,69 @@ public class RequestServiceImpl implements RequestService {
         request.setStatus(RequestStatus.CANCELED);
 
         return RequestMapper.toRequestDto(requestRepository.save(request));
+    }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<RequestDto> getRequests(int userId, int eventId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(" Пользователь с id=" + userId + " не найден"));
+        eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Событие с id=" + eventId + " не найден"));
+
+        List<Request> requests = requestRepository.findByEventIdAndEventInitiatorId(eventId, userId);
+        List<RequestDto> requestDtos = new ArrayList<>();
+        requestDtos.addAll(requests.stream().map(RequestMapper::toRequestDto).collect(Collectors.toList()));
+        return requestDtos;
+    }
+
+    @Override
+    @Transactional
+    public RequestStatusUpdateResult updateRequestStatus(RequestStatusUpdateRequest requestStatusUpdateRequest,
+                                                         int eventId, int userId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Событие с id=" + eventId + " не найден"));
+
+        if (event.getParticipantLimit() == 0 || !event.getRequestModeration()) {
+            throw new AlreadyAvailableException("Модерация заявок не требуется");
+        }
+        if (event.getParticipantLimit() - event.getConfirmedRequests() <= 0) {
+            throw new AlreadyAvailableException("Достигнут лимит заявок на событие");
+        }
+
+        List<Request> requestsByEvent = requestRepository.findByEventId(eventId);
+        List<Request> requestsByIds = new ArrayList<>();
+
+        for (Request request : requestsByEvent) {
+            if (requestStatusUpdateRequest.getRequestIds().contains(request.getId())) {
+                requestsByIds.add(request);
+            }
+        }
+
+        if (requestStatusUpdateRequest.getStatus().equals(RequestStatus.CONFIRMED)) {
+            for (Request request : requestsByIds) {
+
+                if (event.getParticipantLimit() - event.getConfirmedRequests() <= 0) {
+                    request.setStatus(RequestStatus.REJECTED);
+                }
+
+                request.setStatus(RequestStatus.CONFIRMED);
+                event.setConfirmedRequests(event.getConfirmedRequests() + 1);
+
+                requestRepository.save(request);
+            }
+        }
+
+        if (requestStatusUpdateRequest.getStatus().equals(RequestStatus.REJECTED)) {
+            for (Request request : requestsByIds) {
+                request.setStatus(RequestStatus.REJECTED);
+                requestRepository.save(request);
+            }
+        }
+
+        eventRepository.save(event);
+
+        return RequestMapper.toRequestStatusUpdateResult(requestsByIds);
     }
 }

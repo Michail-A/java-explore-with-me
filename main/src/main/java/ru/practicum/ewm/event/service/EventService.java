@@ -27,16 +27,11 @@ public interface EventService {
 
     EventFullDto updateEvent(EventUpdateDto eventDtoNew, int userId, int eventId);
 
-    List<RequestDto> getRequests(int userId, int eventId);
-
-    RequestStatusUpdateResult updateRequestStatus(RequestStatusUpdateRequest requestStatusUpdateRequest,
-                                                  int eventId, int userId);
-
     List<EventFullDto> getAll(AdminRequestParam param);
 
     EventFullDto updateByAdmin(EventUpdateDto eventUpdateDto, int eventId);
 
     List<EventShortDto> getAll(PublicRequestParam param);
 
-    EventFullDto getByIdForPublic(int eventId);
+    EventFullDto getById(int eventId);
 }
