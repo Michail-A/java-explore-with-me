@@ -27,7 +27,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"text\": \"comment #1\"\r\n}",
+					"raw": "{\r\n    \"text\": \"comment #1\",\r\n    \"eventId\": 103\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -35,7 +35,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/users/:userId/comments/:eventId",
+					"raw": "http://localhost:8080/users/:userId/comments",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -44,17 +44,12 @@
 					"path": [
 						"users",
 						":userId",
-						"comments",
-						":eventId"
+						"comments"
 					],
 					"variable": [
 						{
 							"key": "userId",
 							"value": "135"
-						},
-						{
-							"key": "eventId",
-							"value": "103"
 						}
 					]
 				}
@@ -81,7 +76,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"text\": \"comment #2\"\r\n}",
+					"raw": "{\r\n    \"text\": \"comment #2\",\r\n    \"eventId\": 103\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -89,7 +84,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/users/:userId/comments/:eventId",
+					"raw": "http://localhost:8080/users/:userId/comments",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -98,17 +93,61 @@
 					"path": [
 						"users",
 						":userId",
-						"comments",
-						":eventId"
+						"comments"
 					],
 					"variable": [
 						{
 							"key": "userId",
 							"value": "134"
-						},
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetCommentById",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/comments/comment/:comId",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"comments",
+						"comment",
+						":comId"
+					],
+					"variable": [
 						{
-							"key": "eventId",
-							"value": "103"
+							"key": "comId",
+							"value": "1"
 						}
 					]
 				}
@@ -135,7 +174,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"text\": \"updated\"\r\n}",
+					"raw": "{\r\n    \"id\": 1,\r\n    \"text\": \"updated\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -143,7 +182,56 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/users/:userId/comments/:eventId/comment/:comId",
+					"raw": "http://localhost:8080/users/:userId/comments",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"users",
+						":userId",
+						"comments"
+					],
+					"variable": [
+						{
+							"key": "userId",
+							"value": "135"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetCommentByIdByUser",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/users/:userId/comments/:comId",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -153,18 +241,12 @@
 						"users",
 						":userId",
 						"comments",
-						":eventId",
-						"comment",
 						":comId"
 					],
 					"variable": [
 						{
 							"key": "userId",
 							"value": "135"
-						},
-						{
-							"key": "eventId",
-							"value": "103"
 						},
 						{
 							"key": "comId",
@@ -233,7 +315,7 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/users/:userId/comments/:eventId/comment/:comId",
+					"raw": "http://localhost:8080/users/:userId/comments/:comId",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -243,18 +325,12 @@
 						"users",
 						":userId",
 						"comments",
-						":eventId",
-						"comment",
 						":comId"
 					],
 					"variable": [
 						{
 							"key": "userId",
 							"value": "135"
-						},
-						{
-							"key": "eventId",
-							"value": "103"
 						},
 						{
 							"key": "comId",
