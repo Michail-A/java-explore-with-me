@@ -13,13 +13,18 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/comments/{eventId}")
+@RequestMapping("/comments")
 @Validated
 public class PublicCommentController {
     private final CommentService commentService;
 
-    @GetMapping
+    @GetMapping("/{eventId}")
     public List<CommentGetDto> get(@PathVariable int eventId) {
         return commentService.get(eventId);
+    }
+
+    @GetMapping("/comment/{comId}")
+    public CommentGetDto getById(@PathVariable int comId) {
+        return commentService.getById(comId);
     }
 }

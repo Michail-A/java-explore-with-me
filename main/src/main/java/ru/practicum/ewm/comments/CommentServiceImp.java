@@ -3,9 +3,10 @@ package ru.practicum.ewm.comments;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.ewm.comments.controller.CommentParam;
+import ru.practicum.ewm.comments.dto.CommentCreateDto;
 import ru.practicum.ewm.comments.dto.CommentGetDto;
 import ru.practicum.ewm.comments.dto.CommentMapper;
+import ru.practicum.ewm.comments.dto.CommentUpdateDto;
 import ru.practicum.ewm.event.Event;
 import ru.practicum.ewm.event.EventRepository;
 import ru.practicum.ewm.event.Status;
@@ -14,7 +15,7 @@ import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.users.User;
 import ru.practicum.ewm.users.UserRepository;
 
-import javax.validation.ValidationException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,55 +28,43 @@ public class CommentServiceImp implements CommentService {
 
     @Override
     @Transactional
-    public CommentGetDto create(CommentParam param) {
-        User user = userRepository.findById(param.getUserId())
-                .orElseThrow(() -> new NotFoundException("Пользователь с id=" + param.getUserId() + " не найден"));
-        Event event = eventRepository.findById(param.getEventId())
-                .orElseThrow(() -> new NotFoundException("Событие с id=" + param.getEventId() + " не найден"));
+    public CommentGetDto create(CommentCreateDto dto, int userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id=" + userId + " не найден"));
+        Event event = eventRepository.findById(dto.getEventId())
+                .orElseThrow(() -> new NotFoundException("Событие с id=" + dto.getEventId() + " не найден"));
 
         if (!event.getState().equals(Status.PUBLISHED)) {
-            throw new AlreadyAvailableException("Событие id=" + param.getEventId() + " еще не опубликовано");
+            throw new AlreadyAvailableException("Событие id=" + dto.getEventId() + " еще не опубликовано");
         }
-        Comment comment = CommentMapper.toModel(param.getCreateDto(), user, event);
+        Comment comment = CommentMapper.toModel(dto, user, event);
 
         return CommentMapper.toCommentGetDto(commentRepository.save(comment));
     }
 
     @Override
     @Transactional
-    public CommentGetDto update(CommentParam param) {
-        userRepository.findById(param.getUserId())
-                .orElseThrow(() -> new NotFoundException("Пользователь с id=" + param.getUserId() + " не найден"));
-        Comment comment = commentRepository.findById(param.getComId())
-                .orElseThrow(() -> new NotFoundException("Комментарий с id=" + param.getComId() + " не найден"));
+    public CommentGetDto update(CommentUpdateDto dto, int userId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id=" + userId + " не найден"));
+        Comment comment = commentRepository.findById(dto.getId())
+                .orElseThrow(() -> new NotFoundException("Комментарий с id=" + dto.getId() + " не найден"));
 
-        if (comment.getEvent().getId() != param.getEventId()) {
-            throw new ValidationException("Комментарий id= " + param.getComId() + " не относится к событию id="
-                    + param.getEventId());
-        }
-        if (comment.getAuthor().getId() != param.getUserId()) {
-            throw new ValidationException("Комментарий id=  " + param.getComId() + " не принадлежит пользователю id=" + param.getUserId());
-        }
 
-        comment.setText(param.getDto().getText());
+        comment.setText(dto.getText());
         comment.setIsEdited(true);
+        comment.setEdited(LocalDateTime.now());
 
         return CommentMapper.toCommentGetDto(commentRepository.save(comment));
     }
 
     @Override
     @Transactional
-    public void delete(CommentParam param) {
-        userRepository.findById(param.getUserId())
-                .orElseThrow(() -> new NotFoundException("Пользователь с id=" + param.getUserId() + " не найден"));
-        eventRepository.findById(param.getEventId())
-                .orElseThrow(() -> new NotFoundException("Событие с id=" + param.getEventId() + " не найден"));
-        Comment comment = commentRepository.findById(param.getComId())
-                .orElseThrow(() -> new NotFoundException("Комментарий с id=" + param.getComId() + " не найден"));
+    public void delete(int userId, int comId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id=" + userId + " не найден"));
 
-        if (comment.getAuthor().getId() != param.getUserId()) {
-            throw new AlreadyAvailableException("Комментарий id=" + param.getComId() + " принадлежит другому пользователю");
-        }
+        Comment comment = commentRepository.findByIdAndAuthorId(comId, userId);
 
         commentRepository.delete(comment);
     }
@@ -98,5 +87,21 @@ public class CommentServiceImp implements CommentService {
         return comments.stream()
                 .map(CommentMapper::toCommentGetDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public CommentGetDto getByUser(int userId, int comId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id=" + userId + " не найден"));
+
+        Comment comment = commentRepository.findByIdAndAuthorId(comId, userId);
+        return CommentMapper.toCommentGetDto(comment);
+    }
+
+    @Override
+    public CommentGetDto getById(int comId) {
+        Comment comment = commentRepository.findById(comId)
+                .orElseThrow(() -> new NotFoundException("Комментарий с id=" + comId + " не найден"));
+        return CommentMapper.toCommentGetDto(comment);
     }
 }

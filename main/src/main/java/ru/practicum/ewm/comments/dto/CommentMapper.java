@@ -25,6 +25,9 @@ public class CommentMapper {
         dto.setText(comment.getText());
         dto.setCreated(comment.getCreated());
         dto.setIsEdited(comment.getIsEdited());
+        if (dto.getIsEdited()) {
+            dto.setEdited(comment.getEdited());
+        }
         return dto;
     }
 }

@@ -15,4 +15,5 @@ public class CommentGetDto {
     private String text;
     private LocalDateTime created;
     private Boolean isEdited;
+    private LocalDateTime edited;
 }

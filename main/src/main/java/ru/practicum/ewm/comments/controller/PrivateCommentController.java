@@ -13,7 +13,7 @@ import javax.validation.Valid;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/users/{userId}/comments/{eventId}")
+@RequestMapping("/users/{userId}/comments")
 @Validated
 public class PrivateCommentController {
     private final CommentService commentService;
@@ -21,40 +21,29 @@ public class PrivateCommentController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public CommentGetDto create(@RequestBody @Valid CommentCreateDto dto,
-                                @PathVariable int userId,
-                                @PathVariable int eventId) {
-        CommentParam param = new CommentParam();
-        param.setCreateDto(dto);
-        param.setUserId(userId);
-        param.setEventId(eventId);
+                                @PathVariable int userId) {
 
-        return commentService.create(param);
+        return commentService.create(dto, userId);
     }
 
-    @PatchMapping("/comment/{comId}")
+    @PatchMapping
     public CommentGetDto update(@RequestBody @Valid CommentUpdateDto dto,
-                                @PathVariable int userId,
-                                @PathVariable int eventId,
-                                @PathVariable int comId) {
-        CommentParam param = new CommentParam();
-        param.setDto(dto);
-        param.setUserId(userId);
-        param.setEventId(eventId);
-        param.setComId(comId);
+                                @PathVariable int userId) {
 
-        return commentService.update(param);
+
+        return commentService.update(dto, userId);
     }
 
-    @DeleteMapping("/comment/{comId}")
+    @DeleteMapping("/{comId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable int userId,
-                       @PathVariable int eventId,
                        @PathVariable int comId) {
-        CommentParam param = new CommentParam();
-        param.setUserId(userId);
-        param.setEventId(eventId);
-        param.setComId(comId);
+        commentService.delete(userId, comId);
+    }
 
-        commentService.delete(param);
+    @GetMapping("/{comId}")
+    public CommentGetDto getByUser(@PathVariable int userId,
+                                   @PathVariable int comId) {
+        return commentService.getByUser(userId, comId);
     }
 }

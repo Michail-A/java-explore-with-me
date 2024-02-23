@@ -29,9 +29,15 @@ public class Comment {
     @JoinColumn(name = "author_id")
     private User author;
 
+    @Column(name = "text")
     private String text;
+
+    @Column(name = "created")
     private LocalDateTime created;
 
     @Column(name = "is_edited")
     private Boolean isEdited;
+
+    @Column(name = "edited")
+    private LocalDateTime edited;
 }
